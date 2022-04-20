@@ -1,5 +1,3 @@
-import './App.css';
-
 import { useEffect, useRef, useState } from 'react';
 
 import { AppBar, List, ListItem, ListItemButton, ListItemText, TextField } from '@mui/material';
@@ -59,7 +57,7 @@ function App() {
     <Box display={'flex'} flexDirection={'column'} height="100vh">
       <Box flex={0}>
         <AppBar position='relative'>
-          <TextField ref={searchRef} id="outlined-basic" label="Use ArrowUp or ArrowDown" variant="outlined" />
+          <TextField ref={searchRef} autoFocus placeholder="Use ArrowUp or ArrowDown" variant="outlined" />
         </AppBar>
       </Box>
       <Box flex={1}>
