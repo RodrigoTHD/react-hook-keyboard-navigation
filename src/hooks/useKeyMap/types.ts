@@ -1,20 +1,23 @@
 import { RefObject } from 'react';
 
-export type Target = RefObject<HTMLElement>;
+export type KeyMapTarget = RefObject<HTMLElement>;
 
-export type Key = string | string[] | number | number[];
+export type Key = string | string[];
+
+export type EventListener = (e: Event) => void;
 
 export type KeyMap = {
-  handler: (e: Event) => void;
+  handler: (e: KeyboardEvent) => void;
   key: Key;
-  target?: Target;
-};
-
-export type KeyMapProps = {
-  key?: Key;
+  target: KeyMapTarget;
 };
 
 export type KeyMapResult = {
   addKeyMap: (keyMap: KeyMap) => void;
   removeKeyMap: (keyMap: KeyMap) => void;
 };
+
+export enum EventActionType {
+  Add,
+  Remove
+}

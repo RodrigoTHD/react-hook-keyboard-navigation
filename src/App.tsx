@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { AppBar, List, ListItem, ListItemButton, ListItemText, TextField } from '@mui/material';
+import {
+  AppBar,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  TextField
+} from '@mui/material';
 import { Box } from '@mui/system';
 
 import { KeyMap, useKeyMap } from './hooks/useKeyMap';
@@ -8,40 +15,48 @@ import { KeyMap, useKeyMap } from './hooks/useKeyMap';
 const createItemsLabel = (total: number): string[] => {
   const items: string[] = [];
   for (let i = 1; i <= total; i++) {
-    items.push(`Item ${i}`)
+    items.push(`Item ${i}`);
   }
   return items;
-}
+};
 
 function App() {
   const items: string[] = createItemsLabel(10);
-  const searchRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { addKeyMap, removeKeyMap } = useKeyMap();
   const [index, setIndex] = useState(0);
+
+  const setInputFocus = useCallback(() => {
+    searchInputRef.current?.focus();
+  }, []);
+
+  const onItemClick = useCallback(
+    (itemIndex: number) => {
+      setIndex(itemIndex);
+      setInputFocus();
+    },
+    [setIndex, setInputFocus]
+  );
 
   useEffect(() => {
     let keyMap: KeyMap;
 
-    if (searchRef.current) {
+    if (searchInputRef.current) {
       keyMap = {
-        target: searchRef,
+        target: searchInputRef,
         key: 'keydown',
-        handler: (e: Event) => {
+        handler: (e: KeyboardEvent) => {
           console.log(e);
           let newIndex: number = index;
           const lastItemIndex = items.length - 1;
 
-          if (e.code === "ArrowUp") {
+          if (e.code === 'ArrowUp') {
             newIndex--;
-          } else if(e.code === "ArrowDown") {
-            newIndex++;            
-          }   
-          
-          newIndex = newIndex < 0 
-            ? 0 
-            : newIndex > lastItemIndex 
-              ? lastItemIndex 
-              :  newIndex;
+          } else if (e.code === 'ArrowDown') {
+            newIndex++;
+          }
+
+          newIndex = Math.min(Math.max(newIndex, 0), lastItemIndex);
 
           setIndex(newIndex);
         }
@@ -50,31 +65,37 @@ function App() {
     }
     return () => {
       removeKeyMap(keyMap);
-    }
-  }, [addKeyMap, removeKeyMap, setIndex, index, items.length])  
+    };
+  }, [addKeyMap, removeKeyMap, setIndex, index, items.length]);
 
   return (
-    <Box display={'flex'} flexDirection={'column'} height="100vh">
+    <Box display={'flex'} flexDirection={'column'} height='100vh'>
       <Box flex={0}>
         <AppBar position='relative'>
-          <TextField ref={searchRef} autoFocus placeholder="Use ArrowUp or ArrowDown" variant="outlined" />
+          <TextField
+            inputRef={searchInputRef}
+            autoFocus
+            placeholder='Use ArrowUp or ArrowDown'
+            variant='outlined'
+          />
         </AppBar>
       </Box>
       <Box flex={1}>
         <List disablePadding>
-          {items.map((itemLabel: string, i: number) => {
+          {items.map((itemLabel: string, itemIndex: number) => {
             return (
-              <ListItem 
+              <ListItem
+                onClick={() => onItemClick(itemIndex)}
                 disablePadding
-                selected={index === i}>
+                selected={index === itemIndex}>
                 <ListItemButton>
                   <ListItemText primary={itemLabel} />
                 </ListItemButton>
               </ListItem>
-              )
+            );
           })}
-        </List>      
-      </Box>      
+        </List>
+      </Box>
     </Box>
   );
 }

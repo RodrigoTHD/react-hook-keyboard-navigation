@@ -1,20 +1,37 @@
 import { useCallback } from 'react';
 
-import { KeyMap, KeyMapProps, KeyMapResult } from './types';
+import { EventActionType, EventListener, KeyMap, KeyMapResult } from './types';
 
-export const useKeyMap = (props: KeyMapProps = {}): KeyMapResult  => {
-      
-  const addKeyMap = useCallback((KeyMap: KeyMap) => {
-    const { target, key, handler } = KeyMap;
-    const stringKey = String(key);
-    target?.current?.addEventListener(stringKey, handler, false);
-  }, []);
+export const useKeyMap = (): KeyMapResult => {
+  const configureEventListener = useCallback(
+    (eventAction: EventActionType, KeyMap: KeyMap) => {
+      const { target, key, handler } = KeyMap;
+      const keys = Array.isArray(key) ? key : Array(key);
+      const eventHandler = handler as EventListener;
+      keys.forEach(key => {
+        if (eventAction === EventActionType.Add) {
+          target?.current?.addEventListener(key, eventHandler, false);
+        } else {
+          target?.current?.removeEventListener(key, eventHandler, false);
+        }
+      });
+    },
+    []
+  );
 
-  const removeKeyMap = useCallback((KeyMap: KeyMap) => {
-    const { target, key, handler } = KeyMap;
-    const stringKey = String(key);
-    target?.current?.removeEventListener(stringKey, handler, false);
-  }, []);
+  const addKeyMap = useCallback(
+    (KeyMap: KeyMap) => {
+      configureEventListener(EventActionType.Add, KeyMap);
+    },
+    [configureEventListener]
+  );
 
-  return {addKeyMap, removeKeyMap};
-}
+  const removeKeyMap = useCallback(
+    (KeyMap: KeyMap) => {
+      configureEventListener(EventActionType.Remove, KeyMap);
+    },
+    [configureEventListener]
+  );
+
+  return { addKeyMap, removeKeyMap };
+};
